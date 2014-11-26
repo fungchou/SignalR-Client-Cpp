@@ -118,14 +118,22 @@ TEST(websocket_transport_connect, cannot_call_connect_on_already_connected_trans
 
 TEST(websocket_transport_connect, can_connect_after_disconnecting)
 {
-    auto client = std::make_shared<test_websocket_client>();
-    auto ws_transport = websocket_transport::create(client, logger(std::make_shared<trace_log_writer>(), trace_level::none),
-        [](const utility::string_t&){});
+    for (int i = 0; i < 1000000; i++)
+    {
+        if ((i % 1000) == 0)
+        {
+            std::cout << "iteration " << i << std::endl;
+        }
 
-    ws_transport->connect(_XPLATSTR("ws://fakeuri.org")).get();
-    ws_transport->disconnect().get();
-    ws_transport->connect(_XPLATSTR("ws://fakeuri.org")).get();
-    // shouldn't throw or crash
+        auto client = std::make_shared<test_websocket_client>();
+        auto ws_transport = websocket_transport::create(client, logger(std::make_shared<trace_log_writer>(), trace_level::none),
+            [](const utility::string_t&){});
+
+        ws_transport->connect(_XPLATSTR("ws://fakeuri.org")).get();
+        ws_transport->disconnect().get();
+        ws_transport->connect(_XPLATSTR("ws://fakeuri.org")).get();
+        // shouldn't throw or crash
+    }
 }
 
 TEST(websocket_transport_connect, transport_destroyed_even_if_disconnect_not_called)
