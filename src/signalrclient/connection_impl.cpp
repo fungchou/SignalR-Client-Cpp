@@ -479,9 +479,12 @@ namespace signalr
 
         auto weak_connection = std::weak_ptr<connection_impl>(shared_from_this());
 
+        auto reconnecting_called = std::make_shared<pplx::event>();
+        auto weak_reconnecting_called = std::weak_ptr<pplx::event>(reconnecting_called);
+
         // this is non-blocking
         try_reconnect(reconnect_url, utility::datetime::utc_now().to_interval(), m_reconnect_window, m_reconnect_delay, m_disconnect_cts)
-            .then([weak_connection](pplx::task<bool> reconnect_task)
+            .then([weak_connection, weak_reconnecting_called](pplx::task<bool> reconnect_task)
             {
                 // try reconnect does not throw
                 auto reconnected = reconnect_task.get();
@@ -510,6 +513,12 @@ namespace signalr
 
                     try
                     {
+                        auto reconnecting_called = weak_reconnecting_called.lock();
+                        if (reconnecting_called)
+                        {
+                            reconnecting_called->wait();
+                        }
+
                         connection->m_reconnected();
                     }
                     catch (const std::exception &e)
@@ -554,6 +563,8 @@ namespace signalr
                 trace_level::errors,
                 utility::string_t(_XPLATSTR("reconnecting callback threw an unknown exception")));
         }
+
+        reconnecting_called->set();
     }
 
     // the assumption is that this function won't throw
