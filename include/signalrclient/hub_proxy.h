@@ -25,6 +25,10 @@ namespace signalr
 
         SIGNALRCLIENT_API hub_proxy();
 
+        SIGNALRCLIENT_API hub_proxy(const hub_proxy& other);
+
+        SIGNALRCLIENT_API hub_proxy(const hub_proxy&& other);
+
         SIGNALRCLIENT_API ~hub_proxy();
 
         SIGNALRCLIENT_API utility::string_t __cdecl get_hub_name() const;
