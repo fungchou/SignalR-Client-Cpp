@@ -9,19 +9,19 @@
 
 utility::string_t get_url(int argc, _TCHAR* argv[])
 {
-	utility::string_t url(U("http://localhost:8081/"));
+    utility::string_t url(U("http://localhost:8081/"));
 
     for (int i = 0; i < argc; ++i)
-	{
-		utility::string_t str = argv[i];
+    {
+        utility::string_t str = argv[i];
 
-		if (str.find(U("url=")) != std::string::npos)
-		{
-			size_t pos = str.find(U("url="));
-			url = str.substr(pos + 4);
-			break;
-		}
-	}
+        if (str.find(U("url=")) != std::string::npos)
+        {
+            size_t pos = str.find(U("url="));
+            url = str.substr(pos + 4);
+            break;
+        }
+    }
 
-	return url;
+    return url;
 }

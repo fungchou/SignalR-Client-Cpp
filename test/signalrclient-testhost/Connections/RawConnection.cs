@@ -15,7 +15,6 @@ namespace SelfHost
     {
         protected override Task OnReceived(IRequest request, string connectionId, string data)
         {
-
             var message = JsonConvert.DeserializeObject<Message>(data);
 
             switch (message.Type)

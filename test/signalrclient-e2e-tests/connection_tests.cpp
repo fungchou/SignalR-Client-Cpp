@@ -28,22 +28,23 @@ TEST(connection_tests, send_message)
         test_event->set();
     });
 
-    conn->start().then([conn](task<void> start_task)
-    {
-        try
+    conn->start()
+        .then([conn](task<void> start_task)
         {
-            start_task.get();
-            ASSERT_EQ(conn->get_connection_state(), connection_state::connected);
+            try
+            {
+                start_task.get();
+                ASSERT_EQ(conn->get_connection_state(), connection_state::connected);
 
-            web::json::value obj;
-            obj[U("type")] = web::json::value::number(0);
-            obj[U("value")] = web::json::value::string(U("test"));
+                web::json::value obj;
+                obj[U("type")] = web::json::value::number(0);
+                obj[U("value")] = web::json::value::string(U("test"));
 
-            conn->send(obj.serialize());
-        }
-        catch (...)
-        { }
-    });
+                conn->send(obj.serialize());
+            }
+            catch (...)
+            { }
+        });
 
     ASSERT_FALSE(test_event->wait(10000));
 
@@ -62,48 +63,51 @@ TEST(connection_tests, send_message_after_connection_restart)
         test_event->set();
     });
 
-    conn->start().then([conn](task<void> start_task)
-    {
-        try
+    conn->start()
+        .then([conn](task<void> start_task)
         {
-            start_task.get();
-            ASSERT_EQ(conn->get_connection_state(), connection_state::connected);
-        }
-        catch (...)
-        {
-            ASSERT_TRUE(false);
-        }
-    }).get();
+            try
+            {
+                start_task.get();
+                ASSERT_EQ(conn->get_connection_state(), connection_state::connected);
+            }
+            catch (...)
+            {
+                ASSERT_TRUE(false);
+            }
+        }).get();
 
-    conn->stop().then([conn](task<void> stop_task)
-    {
-        try
+    conn->stop()
+        .then([conn](task<void> stop_task)
         {
-            stop_task.get();
-            ASSERT_EQ(conn->get_connection_state(), connection_state::disconnected);
-        }
-        catch (...)
+            try
+            {
+                stop_task.get();
+                ASSERT_EQ(conn->get_connection_state(), connection_state::disconnected);
+            }
+            catch (...)
+            {
+                ASSERT_TRUE(false);
+            }
+        }).get();
+
+    conn->start()
+        .then([conn](task<void> start_task)
         {
-            ASSERT_TRUE(false);
-        }
-    }).get();
+            try
+            {
+                start_task.get();
+                ASSERT_EQ(conn->get_connection_state(), connection_state::connected);
 
-    conn->start().then([conn](task<void> start_task)
-    {
-        try
-        {
-            start_task.get();
-            ASSERT_EQ(conn->get_connection_state(), connection_state::connected);
+                web::json::value obj;
+                obj[U("type")] = web::json::value::number(0);
+                obj[U("value")] = web::json::value::string(U("test"));
 
-            web::json::value obj;
-            obj[U("type")] = web::json::value::number(0);
-            obj[U("value")] = web::json::value::string(U("test"));
-
-            conn->send(obj.serialize());
-        }
-        catch (...)
-        { }
-    });
+                conn->send(obj.serialize());
+            }
+            catch (...)
+            { }
+        });
 
     ASSERT_FALSE(test_event->wait(15000));
 

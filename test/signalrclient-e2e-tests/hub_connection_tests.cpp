@@ -31,32 +31,33 @@ TEST(hub_connection_tests, send_message)
         received_event->set();
     });
 
-    hubConn->start().then([hubConn, &hubProxy, test_event](task<void> start_task)
-    {
-        try
+    hubConn->start()
+        .then([hubConn, &hubProxy, test_event](task<void> start_task)
         {
-            start_task.get();
-            ASSERT_TRUE(hubConn->get_connection_state() == connection_state::connected);
-
-            web::json::value obj{};
-            obj[0] = web::json::value(U("test"));
-
-            hubProxy.invoke<web::json::value>(U("displayMessage"), obj)
-                .then([test_event](task<web::json::value> send_task)
+            try
             {
-                try
-                {
-                    auto test = send_task.get();
-                    ASSERT_EQ(test.serialize(), U("\"test\""));
-                    test_event->set();
-                }
-                catch (...)
-                { }
-            });
-        }
-        catch (...)
-        { }
-    });
+                start_task.get();
+                ASSERT_TRUE(hubConn->get_connection_state() == connection_state::connected);
+
+                web::json::value obj{};
+                obj[0] = web::json::value(U("test"));
+
+                hubProxy.invoke<web::json::value>(U("displayMessage"), obj)
+                    .then([test_event](task<web::json::value> send_task)
+                    {
+                        try
+                        {
+                            auto test = send_task.get();
+                            ASSERT_EQ(test.serialize(), U("\"test\""));
+                            test_event->set();
+                        }
+                        catch (...)
+                        { }
+                    });
+            }
+            catch (...)
+            { }
+        });
 
     ASSERT_FALSE(received_event->wait(10000));
 
@@ -80,58 +81,61 @@ TEST(hub_connection_tests, send_message_after_connection_restart)
         received_event->set();
     });
 
-    hubConn->start().then([hubConn](task<void> start_task)
-    {
-        try
+    hubConn->start()
+        .then([hubConn](task<void> start_task)
         {
-            start_task.get();
-            ASSERT_EQ(hubConn->get_connection_state(), connection_state::connected);
-        }
-        catch (...)
-        {
-            ASSERT_TRUE(false);
-        }
-    }).get();
-
-    hubConn->stop().then([hubConn](task<void> stop_task)
-    {
-        try
-        {
-            stop_task.get();
-            ASSERT_EQ(hubConn->get_connection_state(), connection_state::disconnected);
-        }
-        catch (...)
-        {
-            ASSERT_TRUE(false);
-        }
-    }).get();
-
-    hubConn->start().then([hubConn, &hubProxy, test_event](task<void> start_task)
-    {
-        try
-        {
-            start_task.get();
-            ASSERT_EQ(hubConn->get_connection_state(), connection_state::connected);
-
-            web::json::value obj{};
-            obj[0] = web::json::value(U("test"));
-
-            hubProxy.invoke<web::json::value>(U("displayMessage"), obj)
-                .then([test_event](task<web::json::value> send_task)
+            try
             {
-                try
-                {
-                    auto test = send_task.get();
-                    ASSERT_EQ(test.serialize(), U("\"test\""));
-                    test_event->set();
-                }
-                catch (...)
-                { }
-            });
-        }
-        catch (...)
-        { }
-    });
+                start_task.get();
+                ASSERT_EQ(hubConn->get_connection_state(), connection_state::connected);
+            }
+            catch (...)
+            {
+                ASSERT_TRUE(false);
+            }
+        }).get();
+
+    hubConn->stop()
+        .then([hubConn](task<void> stop_task)
+        {
+            try
+            {
+                stop_task.get();
+                ASSERT_EQ(hubConn->get_connection_state(), connection_state::disconnected);
+            }
+            catch (...)
+            {
+                ASSERT_TRUE(false);
+            }
+        }).get();
+
+    hubConn->start()
+        .then([hubConn, &hubProxy, test_event](task<void> start_task)
+        {
+            try
+            {
+                start_task.get();
+                ASSERT_EQ(hubConn->get_connection_state(), connection_state::connected);
+
+                web::json::value obj{};
+                obj[0] = web::json::value(U("test"));
+
+                hubProxy.invoke<web::json::value>(U("displayMessage"), obj)
+                    .then([test_event](task<web::json::value> send_task)
+                    {
+                        try
+                        {
+                            auto test = send_task.get();
+                            ASSERT_EQ(test.serialize(), U("\"test\""));
+                            test_event->set();
+                        }
+                        catch (...)
+                        { }
+                    });
+            }
+            catch (...)
+            { }
+        });
 
     ASSERT_FALSE(received_event->wait(15000));
 
@@ -148,7 +152,7 @@ TEST(hub_connection_tests, send_message_after_reconnect)
     auto reconnected_event = make_shared<pplx::event>();
     auto received_event = make_shared<pplx::event>();
 
-    hub_proxy hubProxy = hubConn->create_hub_proxy(U("hubConnection"));
+    auto hubProxy = hubConn->create_hub_proxy(U("hubConnection"));
 
     hubConn->set_reconnecting([hubConn, reconnecting_event]()
     {
@@ -168,30 +172,31 @@ TEST(hub_connection_tests, send_message_after_reconnect)
         received_event->set();
     });
 
-    hubConn->start().then([hubConn, &hubProxy](task<void> start_task)
-    {
-        try
+    hubConn->start()
+        .then([hubConn, &hubProxy](task<void> start_task)
         {
-            start_task.get();
-            ASSERT_EQ(hubConn->get_connection_state(), connection_state::connected);
-
-            web::json::value obj{};
-            obj[0] = web::json::value(U("test"));
-
-            hubProxy.invoke<web::json::value>(U("forceReconnect"))
-                .then([](pplx::task<web::json::value> send_task)
+            try
             {
-                try
-                {
-                    send_task.get();
-                }
-                catch (...)
-                { }
-            });
-        }
-        catch (...)
-        { }
-    });
+                start_task.get();
+                ASSERT_EQ(hubConn->get_connection_state(), connection_state::connected);
+
+                web::json::value obj{};
+                obj[0] = web::json::value(U("test"));
+
+                hubProxy.invoke<web::json::value>(U("forceReconnect"))
+                    .then([](pplx::task<web::json::value> send_task)
+                    {
+                        try
+                        {
+                            send_task.get();
+                        }
+                        catch (...)
+                        { }
+                    });
+            }
+            catch (...)
+            { }
+        });
 
     ASSERT_FALSE(reconnecting_event->wait(60000));
 
@@ -204,11 +209,11 @@ TEST(hub_connection_tests, send_message_after_reconnect)
 
     hubProxy.invoke<web::json::value>(U("displayMessage"), obj)
         .then([test_event](task<web::json::value> send_task)
-    {
-        auto test = send_task.get();
-        ASSERT_EQ(test.serialize(), U("\"test\""));
-        test_event->set();
-    });
+        {
+            auto test = send_task.get();
+            ASSERT_EQ(test.serialize(), U("\"test\""));
+            test_event->set();
+        });
 
     ASSERT_FALSE(received_event->wait(10000));
 
