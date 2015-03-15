@@ -70,12 +70,11 @@ TEST(connection_tests, send_message_after_connection_restart)
             ASSERT_EQ(conn->get_connection_state(), connection_state::connected);
         }
         catch (...)
-        { }
-    }).then([]()
-    {
-        return;
-    });
-    
+        { 
+            ASSERT_TRUE(false);
+        }
+    }).get();
+
     conn->stop().then([conn](task<void> stop_task)
     {
         try
@@ -84,11 +83,10 @@ TEST(connection_tests, send_message_after_connection_restart)
             ASSERT_EQ(conn->get_connection_state(), connection_state::disconnected);
         }
         catch (...)
-        { }
-    }).then([]()
-    {
-        return;
-    });
+        { 
+            ASSERT_TRUE(false);
+        }
+    }).get();
 
     conn->start().then([conn](task<void> start_task)
     {

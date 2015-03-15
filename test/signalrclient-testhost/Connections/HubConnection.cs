@@ -22,5 +22,50 @@ namespace SelfHost
             Clients.Caller.displayMessage("Send: " + message);
             return message;
         }
+
+        public void Send()
+        {
+            Clients.Caller.send("Send");
+        }
+        public int SendNumber(int num)
+        {
+            Clients.Caller.sendNumber(num);
+            return num;
+        }
+
+        public int SendMessages(int num, string message)
+        {
+            Clients.Caller.sendMessages(num, message);
+            return num;
+        }
+
+        public async Task<string> ReportProgress(string jobName, IProgress<int> progress)
+        {
+            for (int i = 0; i <= 10; i++)
+            {
+                await Task.Delay(250);
+                progress.Report(i);
+            }
+            return String.Format("{0} done!", jobName);
+        }
+
+        public Person ComplexType(Person p)
+        {
+            Clients.Caller.displayPerson(p);
+            return p;
+        }
+
+        public class Person
+        {
+            public string Name { get; set; }
+            public int Age { get; set; }
+            public Address Address { get; set; }
+        }
+
+        public class Address
+        {
+            public string Street { get; set; }
+            public string Zip { get; set; }
+        }
     }
 }
